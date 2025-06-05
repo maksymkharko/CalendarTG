@@ -127,13 +127,13 @@
 
     @keyframes pulse-warning {
       0% { background-color: var(--card-color); }
-      50% { background-color: rgba(255, 159, 67, 0.3); } /* Subtle yellow tint */
+      50% { background-color: rgba(255, 159, 67, 0.2); }
       100% { background-color: var(--card-color); }
     }
 
     @keyframes pulse-danger {
       0% { background-color: var(--card-color); }
-      50% { background-color: rgba(245, 93, 61, 0.3); } /* Subtle red tint */
+      50% { background-color: rgba(245, 93, 61, 0.2); }
       100% { background-color: var(--card-color); }
     }
 
@@ -271,7 +271,7 @@
 
     .modal-title {
       font-size: 18px;
-      font-weight: 600;
+      font-weight SIX00;
     }
 
     .close-btn {
@@ -355,10 +355,9 @@
 <body>
   <div class="hide-keyboard-area" id="hide-keyboard-area"></div>
 
-  <div class="header">
-    <div class="header-title">Календарь событий</div>
+<div class="header" style="text-align: right;">
     <button class="add-btn" onclick="openAddModal()">+</button>
-  </div>
+</div>
 
   <div class="events-list" id="events-list">
     <div class="empty-state">Нажмите + чтобы добавить событие</div>
@@ -603,7 +602,7 @@
       });
     }
 
-    function resetSwipedItem(){
+    function resetSwipedItem() {
       if (currentSwipedItem) {
         const swipeable = currentSwipedItem.querySelector('.swipeable-container');
         swipeable.style.transform = 'translateX(0)';
