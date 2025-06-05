@@ -118,22 +118,22 @@
     }
 
     .event-item.warning {
-      animation: pulse-warning 1.5s infinite;
+      animation: pulse-warning 3s ease-in-out infinite;
     }
 
     .event-item.danger {
-      animation: pulse-danger 1s infinite;
+      animation: pulse-danger 2s ease-in-out infinite;
     }
 
     @keyframes pulse-warning {
       0% { background-color: var(--card-color); }
-      50% { background-color: var(--warning-color); }
+      50% { background-color: rgba(255, 159, 67, 0.3); } /* Subtle yellow tint */
       100% { background-color: var(--card-color); }
     }
 
     @keyframes pulse-danger {
       0% { background-color: var(--card-color); }
-      50% { background-color: var(--danger-color); }
+      50% { background-color: rgba(245, 93, 61, 0.3); } /* Subtle red tint */
       100% { background-color: var(--card-color); }
     }
 
@@ -603,7 +603,7 @@
       });
     }
 
-    function resetSwipedItem() {
+    function resetSwipedItem(){
       if (currentSwipedItem) {
         const swipeable = currentSwipedItem.querySelector('.swipeable-container');
         swipeable.style.transform = 'translateX(0)';
