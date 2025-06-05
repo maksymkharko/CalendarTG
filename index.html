@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Календарь событий</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg-color: var(--tg-theme-bg-color, #18222d);
+      --card-color: var(--tg-theme-secondary-bg-color, #2b5278);
+      --text-color: var(--tg-theme-text-color, #ffffff);
+      --hint-color: var(--tg-theme-hint-color, #aaaaaa);
+      --accent-color: var(--tg-theme-button-color, #3d8df5);
+      --danger-color: #f55d3d;
+      --warning-color: #ff9f43;
+      --border-radius: 12px;
+      --transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, system-ui, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 12px;
+      padding-top: 64px;
+      padding-bottom: 24px;
+      min-height: 100vh;
+      overflow-x: hidden;
+      touch-action: pan-y;
+    }
+
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 16px;
+      background-color: var(--bg-color);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      height: 52px;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    .add-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: var(--accent-color);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .add-btn:active {
+      transform: scale(0.92);
+      opacity: 0.9;
+    }
+
+    .events-list {
+      margin-bottom: 12px;
+    }
+
+    .list-item-container {
+      position: relative;
+      width: 100%;
+      margin-bottom: 8px;
+      overflow: hidden;
+      border-radius: var(--border-radius);
+      min-height: 72px;
+      transition: transform 0.2s ease;
+    }
+
+    .list-item-container:active {
+      transform: scale(0.98);
+    }
+
+    .swipeable-container {
+      display: flex;
+      width: 100%;
+      transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1);
+      will-change: transform;
+    }
+
+    .event-item {
+      background-color: var(--card-color);
+      padding: 12px 14px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+      min-height: 72px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .event-item.warning {
+      animation: pulse-warning 1.5s infinite;
+    }
+
+    .event-item.danger {
+      animation: pulse-danger 1s infinite;
+    }
+
+    @keyframes pulse-warning {
+      0% { background-color: var(--card-color); }
+      50% { background-color: var(--warning-color); }
+      100% { background-color: var(--card-color); }
+    }
+
+    @keyframes pulse-danger {
+      0% { background-color: var(--card-color); }
+      50% { background-color: var(--danger-color); }
+      100% { background-color: var(--card-color); }
+    }
+
+    .delete-action {
+      position: absolute;
+      right: -72px;
+      top: 0;
+      bottom: 0;
+      width: 72px;
+      background-color: var(--danger-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      z-index: 0;
+    }
+
+    .event-name {
+      font-weight: 600;
+      font-size: 15px;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      align-items: center;
+    }
+
+    .event-name-text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .event-countdown {
+      font-weight: 700;
+      color: var(--accent-color);
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+
+    .event-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--hint-color);
+    }
+
+    .detail-badge {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 4px 8px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: var(--card-color);
+      padding: 10px 16px;
+      font-size: 12px;
+      color: var(--hint-color);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      height: 47px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .author-link {
+      color: var(--accent-color);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .storage-usage {
+      color: var(--text-color);
+      font-weight: 500;
+    }
+
+    .scroll-spacer {
+      height: 60px;
+      width: 100%;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-content {
+      background-color: var(--card-color);
+      width: calc(100% - 32px);
+      max-width: 400px;
+      border-radius: var(--border-radius);
+      padding: 18px;
+      transform: translateY(10px);
+      transition: all 0.25s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-color);
+      font-size: 22px;
+      cursor: pointer;
+      padding: 6px;
+      opacity: 0.7;
+    }
+
+    .form-row {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: var(--hint-color);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      border-radius: var(--border-radius);
+      border: none;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--text-color);
+      font-size: 15px;
+      transition: var(--transition);
+    }
+
+    .form-input:focus {
+      outline: none;
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--border-radius);
+      border: none;
+      background-color: var(--accent-color);
+      color: white;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: var(--transition);
+    }
+
+    .submit-btn:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--hint-color);
+      font-size: 14px;
+    }
+
+    .hide-keyboard-area {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 10;
+      display: none;
+    }
+
+    .hide-keyboard-area.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="hide-keyboard-area" id="hide-keyboard-area"></div>
+
+  <div class="header">
+    <div class="header-title">Календарь событий</div>
+    <button class="add-btn" onclick="openAddModal()">+</button>
+  </div>
+
+  <div class="events-list" id="events-list">
+    <div class="empty-state">Нажмите + чтобы добавить событие</div>
+  </div>
+
+  <div class="scroll-spacer"></div>
+
+  <div class="footer">
+    <a href="https://t.me/clownades" class="author-link">@clownades</a>
+    <span class="storage-usage">0% 0b/4096b</span>
+  </div>
+
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-title">Новое событие</div>
+        <button class="close-btn" onclick="closeEditModal()">×</button>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="edit-name">Название события</label>
+        <input type="text" id="edit-name" class="form-input" placeholder="Например, День рождения мамы">
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="edit-date">Дата события</label>
+        <input type="date" id="edit-date" class="form-input">
+      </div>
+      <button class="submit-btn" onclick="saveEvent()">Добавить</button>
+      <input type="hidden" id="edit-id">
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.enableClosingConfirmation();
+    tg.BackButton.hide();
+
+    let currentSwipedItem = null;
+    let startX = 0;
+    let currentX = 0;
+    let isSwiping = false;
+    let isEditMode = false;
+
+    loadEvents();
+
+    const hideKeyboardArea = document.getElementById('hide-keyboard-area');
+    document.addEventListener('focusin', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        hideKeyboardArea.classList.add('active');
+      }
+    });
+
+    hideKeyboardArea.addEventListener('touchstart', () => {
+      document.activeElement.blur();
+      hideKeyboardArea.classList.remove('active');
+    });
+
+    function openAddModal() {
+      isEditMode = false;
+      document.getElementById('modal-title').textContent = 'Новое событие';
+      document.getElementById('edit-id').value = '';
+      document.getElementById('edit-name').value = '';
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('edit-date').value = today;
+
+      tg.HapticFeedback.impactOccurred('light');
+      document.getElementById('edit-modal').classList.add('active');
+      tg.BackButton.show();
+      tg.onEvent('backButtonClicked', closeEditModal);
+    }
+
+    function openEditModal(event) {
+      isEditMode = true;
+      document.getElementById('modal-title').textContent = 'Редактировать событие';
+      document.getElementById('edit-id').value = event.id;
+      document.getElementById('edit-name').value = event.name;
+      document.getElementById('edit-date').value = event.date;
+
+      tg.HapticFeedback.impactOccurred('light');
+      document.getElementById('edit-modal').classList.add('active');
+      tg.BackButton.show();
+      tg.onEvent('backButtonClicked', closeEditModal);
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').classList.remove('active');
+      tg.BackButton.hide();
+      tg.offEvent('backButtonClicked', closeEditModal);
+    }
+
+    async function saveEvent() {
+      const id = document.getElementById('edit-id').value;
+      const name = document.getElementById('edit-name').value.trim();
+      const date = document.getElementById('edit-date').value;
+
+      if (!name || !date) {
+        tg.HapticFeedback.notificationOccurred('error');
+        tg.showAlert('Заполните все поля!');
+        return;
+      }
+
+      tg.HapticFeedback.impactOccurred('medium');
+
+      const event = {
+        id: id || Date.now(),
+        name,
+        date,
+        createdAt: new Date().toISOString()
+      };
+
+      tg.CloudStorage.getItem('events', (err, data) => {
+        let events = err ? [] : JSON.parse(data || '[]');
+
+        if (isEditMode) {
+          events = events.map(evt => evt.id.toString() === id.toString() ? event : evt);
+        } else {
+          events.push(event);
+        }
+
+        tg.CloudStorage.setItem('events', JSON.stringify(events), () => {
+          renderEvents(events);
+          closeEditModal();
+          updateStorageUsage();
+        });
+      });
+    }
+
+    async function loadEvents() {
+      tg.CloudStorage.getItem('events', (err, data) => {
+        if (err) return;
+        const events = data ? JSON.parse(data) : [];
+        renderEvents(events);
+        updateStorageUsage();
+      });
+    }
+
+    function renderEvents(events) {
+      const list = document.getElementById('events-list');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (events.length === 0) {
+        list.innerHTML = '<div class="empty-state">Нажмите + чтобы добавить событие</div>';
+        return;
+      }
+
+      list.innerHTML = '';
+      events.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      events.forEach(evt => {
+        const endDate = new Date(evt.date);
+        const timeDiff = endDate - today;
+        const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+        const container = document.createElement('div');
+        container.className = 'list-item-container';
+        container.dataset.id = evt.id;
+
+        const swipeableContainer = document.createElement('div');
+        swipeableContainer.className = 'swipeable-container';
+
+        const item = document.createElement('div');
+        item.className = 'event-item';
+        if (daysLeft <= 30 && daysLeft > 7) {
+          item.classList.add('warning');
+        } else if (daysLeft <= 7) {
+          item.classList.add('danger');
+        }
+
+        item.innerHTML = `
+          <div class="event-name">
+            <div class="event-name-text" title="${evt.name}">${evt.name}</div>
+            <div class="event-countdown">${daysLeft} дн.</div>
+          </div>
+          <div class="event-details">
+            <span class="detail-badge">${formatDate(evt.date)}</span>
+          </div>
+        `;
+
+        item.addEventListener('click', () => {
+          resetSwipedItem();
+          openEditModal(evt);
+        });
+
+        const deleteAction = document.createElement('div');
+        deleteAction.className = 'delete-action';
+        deleteAction.textContent = 'Удалить';
+        deleteAction.onclick = (e) => {
+          e.stopPropagation();
+          confirmDelete(evt.id);
+        };
+
+        swipeableContainer.appendChild(item);
+        swipeableContainer.appendChild(deleteAction);
+        container.appendChild(swipeableContainer);
+        list.appendChild(container);
+
+        setupSwipe(container, swipeableContainer, evt.id);
+      });
+    }
+
+    function setupSwipe(container, swipeable, id) {
+      let startX, currentX, isDragging = false;
+      const threshold = 40;
+      const deleteWidth = 72;
+
+      container.addEventListener('touchstart', (e) => {
+        if (currentSwipedItem && currentSwipedItem !== container) {
+          resetSwipedItem();
+        }
+
+        startX = e.touches[0].clientX;
+        currentX = startX;
+        isDragging = true;
+        tg.HapticFeedback.impactOccurred('light');
+      });
+
+      container.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+
+        currentX = e.touches[0].clientX;
+        const diff = startX - currentX;
+
+        if (diff > 0) {
+          const translateX = Math.min(diff, deleteWidth);
+          swipeable.style.transform = `translateX(-${translateX}px)`;
+        }
+      });
+
+      container.addEventListener('touchend', () => {
+        if (!isDragging) return;
+        isDragging = false;
+
+        const diff = startX - currentX;
+
+        if (diff > threshold) {
+          swipeable.style.transform = `translateX(-${deleteWidth}px)`;
+          currentSwipedItem = container;
+        } else {
+          swipeable.style.transform = 'translateX(0)';
+        }
+      });
+    }
+
+    function resetSwipedItem() {
+      if (currentSwipedItem) {
+        const swipeable = currentSwipedItem.querySelector('.swipeable-container');
+        swipeable.style.transform = 'translateX(0)';
+        currentSwipedItem = null;
+      }
+    }
+
+    function confirmDelete(id) {
+      tg.HapticFeedback.impactOccurred('rigid');
+
+      tg.showConfirm('Удалить это событие?', (confirmed) => {
+        if (!confirmed) {
+          resetSwipedItem();
+          return;
+        }
+
+        tg.CloudStorage.getItem('events', (err, data) => {
+          if (err) return;
+
+          const events = JSON.parse(data || '[]');
+          const updated = events.filter(evt => evt.id.toString() !== id.toString());
+
+          tg.CloudStorage.setItem('events', JSON.stringify(updated), () => {
+            renderEvents(updated);
+            tg.HapticFeedback.notificationOccurred('success');
+            updateStorageUsage();
+          });
+        });
+      });
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit'
+      });
+    }
+
+    function updateStorageUsage() {
+      tg.CloudStorage.getItem('events', (err, data) => {
+        let usedBytes = 0;
+        if (!err && data) {
+          usedBytes = new TextEncoder().encode(data).length;
+        }
+
+        const totalBytes = 4096;
+        const percentage = Math.round((usedBytes / totalBytes) * 100);
+        const storageText = `${percentage}% ${usedBytes}b/${totalBytes}b`;
+
+        const footer = document.querySelector('.footer');
+        footer.innerHTML = `
+          <a href="https://t.me/clownades" class="author-link">@clownades</a>
+          <span class="storage-usage">${storageText}</span>
+        `;
+      });
+    }
+  </script>
+</body>
+</html>
