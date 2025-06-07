@@ -414,7 +414,7 @@
       </div>
       <div class="form-row">
         <label class="form-label" for="edit-name">Название события</label>
-        <input type="text" id="edit-name" class="form-input" placeholder="Например, День свадьбы">
+        <input type="text" id="edit-name" class="form-input" placeholder="Например, бросил купить...">
       </div>
       <div class="form-row">
         <label class="form-label" for="edit-date">Дата события</label>
@@ -567,11 +567,11 @@
 
       let result = '';
       if (years > 0) result += `${years} ${pluralize(years, ['год', 'года', 'лет'])}`;
-      if (months > 0) result += `${result ? ', ' : ''}${months} мес.`;
-      if (days > 0 || (!years && !months)) result += `${result ? ', ' : ''}${days} дн.`;
+      if (months > 0) result += `${result ? ', ' : ''}${months} месяцев`;
+      if (days > 0 || (!years && !months)) result += `${result ? ', ' : ''}${days} дней`;
       if (isFuture) {
-        if (hours > 0) result += `${result ? ', ' : ''}${hours} ч.`;
-        if (minutes > 0) result += `${result ? ', ' : ''}${minutes} мин.`;
+        if (hours > 0) result += `${result ? ', ' : ''}${hours} часов`;
+        if (minutes > 0) result += `${result ? ', ' : ''}${minutes} минут`;
       }
 
       return {
@@ -627,7 +627,7 @@
         item.innerHTML = `
           <div class="event-name">
             <div class="event-name-text">${evt.name}</div>
-            <div class="event-time">${isFuture ? 'До: ' : 'Прошло: '}${timeString}</div>
+            <div class="event-time">${isFuture ? 'Через ' : 'Прошло: '}${timeString}</div>
           </div>
           <div class="event-details">
             <span class="detail-badge">${formatDate(evt.date)}${evt.time ? ' ' + evt.time : ''}</span>
