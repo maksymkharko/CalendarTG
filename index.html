@@ -568,7 +568,7 @@
       let result = '';
       if (years > 0) result += `${years} ${pluralize(years, ['год', 'года', 'лет'])}`;
       if (months > 0) result += `${result ? ', ' : ''}${months} месяцев`;
-      if (days > 0 || (!years && !months)) result += `${result ? ', ' : ''}${days} дней`;
+      if (days > 0 || (!years && !months)) result += `${result ? ', ' : ''}${days} дн.`;
       if (isFuture) {
         if (hours > 0) result += `${result ? ', ' : ''}${hours} часов`;
         if (minutes > 0) result += `${result ? ', ' : ''}${minutes} минут`;
