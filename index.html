@@ -606,7 +606,7 @@
         item.innerHTML = `
           <div class="event-name">
             <div class="event-name-text">${evt.name}</div>
-            <div class="event-time">${isFuture ? 'До: ' : 'Прошло: '}${timeString}</div>
+            <div class="event-time">${isFuture ? 'Через ' : 'Прошло '}${timeString}</div>
           </div>
           <div class="event-details">
             <span class="detail-badge">${formatDate(evt.date)}</span>
@@ -1283,8 +1283,8 @@
 
       let result = '';
       if (years > 0) result += `${years} ${pluralize(years, ['год', 'года', 'лет'])}`;
-      if (months > 0) result += `${result ? ', ' : ''}${months} мес.`;
-      if (days > 0 || (!years && !months)) result += `${result ? ', ' : ''}${days} дн.`;
+      if (months > 0) result += `${result ? ', ' : ''}${months} месяцев`;
+      if (days > 0 || (!years && !months)) result += `${result ? ', ' : ''}${days} дней`;
       if (isFuture && hours > 0) result += `${result ? ', ' : ''}${hours} ч.`;
 
       return {
