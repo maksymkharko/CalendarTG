@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Календарь событий</title>
+  <title>Календарь прошедших событий</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
@@ -169,7 +169,7 @@
       text-overflow: ellipsis;
     }
 
-    .event-countdown {
+    .event-time-elapsed {
       font-weight: 700;
       color: var(--accent-color);
       flex-shrink: 0;
@@ -355,9 +355,10 @@
 <body>
   <div class="hide-keyboard-area" id="hide-keyboard-area"></div>
 
-<div class="header" style="display: flex; justify-content: flex-end;">
-  <button class="add-btn" onclick="openAddModal()">+</button>
-</div>
+  <div class="header">
+    <div class="header-title">Календарь прошедших событий</div>
+    <button class="add-btn" onclick="openAddModal()">+</button>
+  </div>
 
   <div class="events-list" id="events-list">
     <div class="empty-state">Нажмите + чтобы добавить событие</div>
@@ -378,7 +379,7 @@
       </div>
       <div class="form-row">
         <label class="form-label" for="edit-name">Название события</label>
-        <input type="text" id="edit-name" class="form-input" placeholder="Например, День рождения мамы">
+        <input type="text" id="edit-name" class="form-input" placeholder="Например, День свадьбы">
       </div>
       <div class="form-row">
         <label class="form-label" for="edit-date">Дата события</label>
@@ -494,6 +495,30 @@
       });
     }
 
+    function calculateTimeElapsed(eventDate) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const pastDate = new Date(eventDate);
+      pastDate.setHours(0, 0, 0, 0);
+
+      const timeDiff = today - pastDate;
+      const daysElapsed = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+
+      let years = 0, months = 0, days = daysElapsed;
+
+      years = Math.floor(days / 365);
+      days = days % 365;
+      months = Math.floor(days / 30);
+      days = days % 30;
+
+      let result = '';
+      if (years > 0) result += `${years} ${pluralize(years, ['год', 'года', 'лет'])}`;
+      if (months > 0) result += `${result ? ', ' : ''}${months} мес.`;
+      if (days > 0 || (!years && !months)) result += `${result ? ', ' : ''}${days} дн.`;
+
+      return { timeString: result.trim(), daysElapsed };
+    }
+
     function renderEvents(events) {
       const list = document.getElementById('events-list');
       const today = new Date();
@@ -505,12 +530,10 @@
       }
 
       list.innerHTML = '';
-      events.sort((a, b) => new Date(a.date) - new Date(b.date));
+      events.sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by most recent first
 
       events.forEach(evt => {
-        const endDate = new Date(evt.date);
-        const timeDiff = endDate - today;
-        const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+        const { timeString, daysElapsed } = calculateTimeElapsed(evt.date);
 
         const container = document.createElement('div');
         container.className = 'list-item-container';
@@ -521,16 +544,16 @@
 
         const item = document.createElement('div');
         item.className = 'event-item';
-        if (daysLeft <= 30 && daysLeft > 7) {
+        if (daysElapsed <= 30 && daysElapsed > 7) {
           item.classList.add('warning');
-        } else if (daysLeft <= 7) {
+        } else if (daysElapsed <= 7) {
           item.classList.add('danger');
         }
 
         item.innerHTML = `
           <div class="event-name">
             <div class="event-name-text" title="${evt.name}">${evt.name}</div>
-            <div class="event-countdown">${daysLeft} дн.</div>
+            <div class="event-time-elapsed">${timeString}</div>
           </div>
           <div class="event-details">
             <span class="detail-badge">${formatDate(evt.date)}</span>
@@ -641,6 +664,15 @@
         month: '2-digit',
         year: '2-digit'
       });
+    }
+
+    function pluralize(number, titles) {
+      const cases = [2, 0, 1, 1, 1, 2];
+      return titles[
+        number % 100 > 4 && number % 100 < 20
+          ? 2
+          : cases[number % 10 < 5 ? number % 10 : 5]
+      ];
     }
 
     function updateStorageUsage() {
