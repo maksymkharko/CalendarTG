@@ -331,6 +331,15 @@
       box-shadow: 0 0 0 2px var(--accent-color);
     }
 
+    .form-row-time {
+      display: flex;
+      gap: 12px;
+    }
+
+    .form-input-time {
+      width: 50%;
+    }
+
     .submit-btn {
       width: 100%;
       padding: 16px;
@@ -411,6 +420,12 @@
         <label class="form-label" for="edit-date">Дата события</label>
         <input type="date" id="edit-date" class="form-input">
       </div>
+      <div class="form-row form-row-time">
+        <div class="form-input-time">
+          <label class="form-label" for="edit-time">Время события (необязательно)</label>
+          <input type="time" id="edit-time" class="form-input">
+        </div>
+      </div>
       <button class="submit-btn" onclick="saveEvent()">Добавить</button>
       <input type="hidden" id="edit-id">
     </div>
@@ -449,6 +464,7 @@
       document.getElementById('edit-name').value = '';
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('edit-date').value = today;
+      document.getElementById('edit-time').value = '';
 
       tg.HapticFeedback.impactOccurred('light');
       document.getElementById('edit-modal').classList.add('active');
@@ -462,6 +478,7 @@
       document.getElementById('edit-id').value = event.id;
       document.getElementById('edit-name').value = event.name;
       document.getElementById('edit-date').value = event.date;
+      document.getElementById('edit-time').value = event.time || '';
 
       tg.HapticFeedback.impactOccurred('light');
       document.getElementById('edit-modal').classList.add('active');
@@ -479,10 +496,11 @@
       const id = document.getElementById('edit-id').value;
       const name = document.getElementById('edit-name').value.trim();
       const date = document.getElementById('edit-date').value;
+      const time = document.getElementById('edit-time').value;
 
       if (!name || !date) {
         tg.HapticFeedback.notificationOccurred('error');
-        tg.showAlert('Заполните все поля!');
+        tg.showAlert('Заполните название и дату!');
         return;
       }
 
@@ -492,6 +510,7 @@
         id: id || Date.now(),
         name,
         date,
+        time: time || null,
         createdAt: new Date().toISOString()
       };
 
@@ -521,16 +540,23 @@
       });
     }
 
-    function calculateTimeDifference(eventDate) {
+    function calculateTimeDifference(eventDate, eventTime) {
       const today = new Date();
       const event = new Date(eventDate);
-      event.setHours(0, 0, 0, 0);
-      today.setHours(0, 0, 0, 0);
-
+      
+      // Set event time if provided, otherwise default to 00:00
+      if (eventTime) {
+        const [hours, minutes] = eventTime.split(':').map(Number);
+        event.setHours(hours, minutes, 0, 0);
+      } else {
+        event.setHours(0, 0, 0, 0);
+      }
+      
       const isFuture = event >= today;
       const timeDiff = isFuture ? event - today : today - event;
       const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
 
       let years = 0, months = 0, days = daysDiff;
 
@@ -543,7 +569,10 @@
       if (years > 0) result += `${years} ${pluralize(years, ['год', 'года', 'лет'])}`;
       if (months > 0) result += `${result ? ', ' : ''}${months} мес.`;
       if (days > 0 || (!years && !months)) result += `${result ? ', ' : ''}${days} дн.`;
-      if (isFuture && hours > 0) result += `${result ? ', ' : ''}${hours} ч.`;
+      if (isFuture) {
+        if (hours > 0) result += `${result ? ', ' : ''}${hours} ч.`;
+        if (minutes > 0) result += `${result ? ', ' : ''}${minutes} мин.`;
+      }
 
       return {
         timeString: result.trim() || 'Сегодня',
@@ -578,7 +607,7 @@
       });
 
       events.forEach(evt => {
-        const { timeString, daysDiff, isFuture } = calculateTimeDifference(evt.date);
+        const { timeString, daysDiff, isFuture } = calculateTimeDifference(evt.date, evt.time);
 
         const container = document.createElement('div');
         container.className = 'list-item-container';
@@ -601,7 +630,7 @@
             <div class="event-time">${isFuture ? 'До: ' : 'Прошло: '}${timeString}</div>
           </div>
           <div class="event-details">
-            <span class="detail-badge">${formatDate(evt.date)}</span>
+            <span class="detail-badge">${formatDate(evt.date)}${evt.time ? ' ' + evt.time : ''}</span>
           </div>
         `;
 
