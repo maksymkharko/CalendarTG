@@ -14,8 +14,8 @@
       --accent-color: var(--tg-theme-button-color, #3d8df5);
       --danger-color: #f55d3d;
       --warning-color: #ff9f43;
-      --border-radius: 12px;
-      --transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+      --border-radius: 16px;
+      --transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
     }
 
     * {
@@ -29,9 +29,9 @@
     body {
       background-color: var(--bg-color);
       color: var(--text-color);
-      padding: 12px;
-      padding-top: 64px;
-      padding-bottom: 24px;
+      padding: 16px;
+      padding-top: 68px;
+      padding-bottom: 28px;
       min-height: 100vh;
       overflow-x: hidden;
       touch-action: pan-y;
@@ -49,47 +49,52 @@
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      height: 52px;
+      height: 56px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .header-title {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 600;
       margin-left: 8px;
     }
 
     .add-btn {
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background-color: var(--accent-color);
       color: white;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 22px;
       border: none;
       cursor: pointer;
       transition: var(--transition);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .add-btn:hover {
+      transform: scale(1.05);
     }
 
     .add-btn:active {
-      transform: scale(0.92);
+      transform: scale(0.95);
       opacity: 0.9;
     }
 
     .events-list {
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
 
     .list-item-container {
       position: relative;
       width: 100%;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
       overflow: hidden;
       border-radius: var(--border-radius);
-      min-height: 72px;
+      min-height: 80px;
       transition: transform 0.2s ease;
     }
 
@@ -100,21 +105,22 @@
     .swipeable-container {
       display: flex;
       width: 100%;
-      transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1);
+      transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
       will-change: transform;
     }
 
     .event-item {
       background-color: var(--card-color);
-      padding: 12px 14px;
+      padding: 16px;
       width: 100%;
       position: relative;
       z-index: 1;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-      min-height: 72px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      min-height: 80px;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      border-radius: var(--border-radius);
     }
 
     .event-item.warning {
@@ -139,10 +145,10 @@
 
     .delete-action {
       position: absolute;
-      right: -72px;
+      right: -80px;
       top: 0;
       bottom: 0;
-      width: 72px;
+      width: 80px;
       background-color: var(--danger-color);
       display: flex;
       align-items: center;
@@ -152,42 +158,48 @@
       font-size: 14px;
       cursor: pointer;
       z-index: 0;
+      border-radius: 0 var(--border-radius) var(--border-radius) 0;
     }
 
     .event-name {
       font-weight: 600;
-      font-size: 15px;
+      font-size: 16px;
       display: flex;
       justify-content: space-between;
-      margin-bottom: 6px;
-      align-items: center;
+      align-items: flex-start;
+      margin-bottom: 8px;
+      gap: 8px;
     }
 
     .event-name-text {
-      white-space: nowrap;
+      flex: 1;
       overflow: hidden;
       text-overflow: ellipsis;
+      word-wrap: break-word;
+      max-width: 65%;
     }
 
     .event-time {
-      font-weight: 700;
+      font-weight: 600;
+      font-size: 14px;
       color: var(--accent-color);
       flex-shrink: 0;
-      margin-left: 8px;
+      text-align: right;
+      max-width: 35%;
     }
 
     .event-details {
       display: flex;
       flex-wrap: wrap;
-      gap: 4px;
-      font-size: 12px;
+      gap: 6px;
+      font-size: 13px;
       color: var(--hint-color);
     }
 
     .detail-badge {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 4px 8px;
-      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      padding: 5px 10px;
+      border-radius: 8px;
       display: inline-flex;
       align-items: center;
     }
@@ -198,14 +210,15 @@
       left: 0;
       right: 0;
       background-color: var(--card-color);
-      padding: 10px 16px;
-      font-size: 12px;
+      padding: 12px 16px;
+      font-size: 13px;
       color: var(--hint-color);
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      height: 47px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      height: 50px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .author-link {
@@ -220,7 +233,7 @@
     }
 
     .scroll-spacer {
-      height: 60px;
+      height: 64px;
       width: 100%;
       opacity: 0;
       pointer-events: none;
@@ -232,14 +245,14 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: rgba(0, 0, 0, 0.6);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 1000;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.25s ease;
+      transition: opacity 0.3s ease;
     }
 
     .modal-overlay.active {
@@ -250,12 +263,12 @@
     .modal-content {
       background-color: var(--card-color);
       width: calc(100% - 32px);
-      max-width: 400px;
+      max-width: 420px;
       border-radius: var(--border-radius);
-      padding: 18px;
-      transform: translateY(10px);
-      transition: all 0.25s ease;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
     }
 
     .modal-overlay.active .modal-content {
@@ -266,11 +279,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 18px;
+      margin-bottom: 20px;
     }
 
     .modal-title {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 600;
     }
 
@@ -278,51 +291,63 @@
       background: none;
       border: none;
       color: var(--text-color);
-      font-size: 22px;
+      font-size: 24px;
       cursor: pointer;
       padding: 6px;
       opacity: 0.7;
+      transition: var(--transition);
+    }
+
+    .close-btn:hover {
+      opacity: 1;
     }
 
     .form-row {
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
 
     .form-label {
       display: block;
-      margin-bottom: 6px;
-      font-size: 13px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 500;
       color: var(--hint-color);
     }
 
     .form-input {
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       border-radius: var(--border-radius);
       border: none;
-      background-color: rgba(255, 255, 255, 0.1);
+      background-color: rgba(255, 255, 255, 0.12);
       color: var(--text-color);
-      font-size: 15px;
+      font-size: 16px;
       transition: var(--transition);
     }
 
     .form-input:focus {
       outline: none;
-      background-color: rgba(255, 255, 255, 0.15);
+      background-color: rgba(255, 255, 255, 0.18);
+      box-shadow: 0 0 0 2px var(--accent-color);
     }
 
     .submit-btn {
       width: 100%;
-      padding: 14px;
+      padding: 16px;
       border-radius: var(--border-radius);
       border: none;
       background-color: var(--accent-color);
       color: white;
       font-weight: 600;
-      font-size: 15px;
+      font-size: 16px;
       cursor: pointer;
-      margin-top: 6px;
+      margin-top: 8px;
       transition: var(--transition);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .submit-btn:hover {
+      transform: scale(1.02);
     }
 
     .submit-btn:active {
@@ -332,16 +357,20 @@
 
     .empty-state {
       text-align: center;
-      padding: 40px 20px;
+      padding: 48px 24px;
       color: var(--hint-color);
-      font-size: 14px;
+      font-size: 15px;
+      font-weight: 500;
     }
 
     .hide-keyboard-area {
       position: fixed;
       top: 0;
       left: 0;
-      right Tolkienite: initial-scale=1; font-size: 12px;
+      right: 0;
+      bottom: 0;
+      z-index: 10;
+      display: none;
     }
 
     .hide-keyboard-area.active {
@@ -376,7 +405,7 @@
       </div>
       <div class="form-row">
         <label class="form-label" for="edit-name">Название события</label>
-        <input type="text" id="edit-name" class="form-input" placeholder="Например, День свадьбы">
+        <input type="text" id="edit-name" class="form-input" placeholder="Например, бросил курить...">
       </div>
       <div class="form-row">
         <label class="form-label" for="edit-date">Дата события</label>
@@ -556,7 +585,7 @@
         container.dataset.id = evt.id;
 
         const swipeableContainer = document.createElement('div');
-        swipeableContainer.className = 'swipeable-container';
+        swipeableContainer.className = 'sw spaced-container';
 
         const item = document.createElement('div');
         item.className = 'event-item';
@@ -568,7 +597,7 @@
 
         item.innerHTML = `
           <div class="event-name">
-            <div class="event-name-text" title="${evt.name}">${evt.name}</div>
+            <div class="event-name-text">${evt.name}</div>
             <div class="event-time">${isFuture ? 'Через ' : 'Прошло: '}${timeString}</div>
           </div>
           <div class="event-details">
@@ -601,7 +630,7 @@
     function setupSwipe(container, swipeable, id) {
       let startX, currentX, isDragging = false;
       const threshold = 40;
-      const deleteWidth = 72;
+      const deleteWidth = 80;
 
       container.addEventListener('touchstart', (e) => {
         if (currentSwipedItem && currentSwipedItem !== container) {
@@ -664,7 +693,7 @@
           const events = JSON.parse(data || '[]');
           const updated = events.filter(evt => evt.id.toString() !== id.toString());
 
-          tg.CloudStorage.setItem('events', JSON.stringify(updated), () => {
+          tg.CloudGaming.setItem('events', JSON.stringify(updated), () => {
             renderEvents(updated);
             tg.HapticFeedback.notificationOccurred('success');
             updateStorageUsage();
